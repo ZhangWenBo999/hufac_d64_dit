@@ -92,8 +92,12 @@ class Network(BaseNetwork):
 
     def p_mean_variance(self, y_t, t, clip_denoised: bool, y_cond=None):
         noise_level = extract(self.gammas, t, x_shape=(1, 1)).to(y_t.device)
+
+        class_labels = [3]
+        y = torch.tensor(class_labels, device=y_t.device)
+        
         y_0_hat = self.predict_start_from_noise(
-                y_t, t=t, noise=self.denoise_fn(torch.cat([y_cond, y_t], dim=1), noise_level)[:, 3:6])
+                y_t, t=t, noise=self.denoise_fn(torch.cat([y_cond, y_t], dim=1), t, y)[:, 3:6])
 
         if clip_denoised:
             y_0_hat.clamp_(-1., 1.)
