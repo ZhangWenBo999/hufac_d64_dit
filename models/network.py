@@ -12,8 +12,15 @@ class Network(BaseNetwork):
             from .sr3_modules.unet import UNet
         elif module_name == 'guided_diffusion':
             from .guided_diffusion_modules.unet import UNet
-        
-        self.denoise_fn = UNet(**unet)
+        elif module_name == 'DiT':
+            from .DiT.models import DiT_models
+
+        self.denoise_fn = DiT_models['DiT-B/4'](
+            input_size=64,
+            num_classes=3
+        )
+
+        # self.denoise_fn = UNet(**unet)
         self.beta_schedule = beta_schedule
         self.model_mean_type = 'dualx'
 
@@ -164,12 +171,15 @@ class Network(BaseNetwork):
         noise = default(noise, lambda: torch.randn_like(y_0))
         y_noisy = self.q_sample(
             y_0=y_0, sample_gammas=sample_gammas.view(-1, 1, 1, 1), noise=noise)
+        class_labels = [3]
+
+        y = torch.tensor(class_labels, device=y_0.device)
 
         if mask is not None:
             # noise_hat = self.denoise_fn(torch.cat([y_cond, y_noisy*mask+(1.-mask)*y_0], dim=1), sample_gammas)
             # loss = self.loss_fn(mask*noise, mask*noise_hat)
 
-            model_output = self.denoise_fn(torch.cat([y_cond, y_noisy*mask+(1.-mask)*y_0], dim=1), sample_gammas)
+            model_output = self.denoise_fn(torch.cat([y_cond, y_noisy*mask+(1.-mask)*y_0], dim=1), t, y)
             mean = self.q_posterior_mean_dualx(x_0=y_0, x_t=y_noisy, t=t)
             target = {
                 'xprev': lambda: mean,
