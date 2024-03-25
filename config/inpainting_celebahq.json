@@ -149,7 +149,7 @@
         "n_epoch": 800, // max epochs, not limited now
         "n_iter": 1e8, // max interations
         "val_epoch": 10, // valdation every specified number of epochs
-        "save_checkpoint_epoch": 10,
+        "save_checkpoint_epoch": 20,
         "log_iter": 1e3, // log every specified number of iterations
         "tensorboard" : false // tensorboardX enable
     },
