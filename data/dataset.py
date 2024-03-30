@@ -50,6 +50,12 @@ class InpaintDataset(data.Dataset):
         self.image_size = image_size
 
     def __getitem__(self, index):
+
+        if index in [4960, 3864]:
+            self.mask_mode = "center"
+        else:
+            self.mask_mode = "hybrid"
+        
         ret = {}
         path = self.imgs[index]
         img = self.tfs(self.loader(path))
